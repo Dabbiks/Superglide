@@ -1,0 +1,4 @@
+name: Superglide
+version: '1.0'
+main: com.dabbiks.superglide.Superglide
+api-version: '1.21'
