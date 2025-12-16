@@ -1,2 +1,4 @@
-package com.dabbiks.superglide.utils;public class Symbols {
+package com.dabbiks.superglide.utils;
+
+public class Symbols {
 }

@@ -1,2 +1,4 @@
-package com.dabbiks.superglide.utils.player;public class SoundUtils {
+package com.dabbiks.superglide.utils.player;
+
+public class SoundUtils {
 }

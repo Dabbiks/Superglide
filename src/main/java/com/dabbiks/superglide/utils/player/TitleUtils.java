@@ -1,2 +1,4 @@
-package com.dabbiks.superglide.utils.player;public class TitleUtils {
+package com.dabbiks.superglide.utils.player;
+
+public class TitleUtils {
 }

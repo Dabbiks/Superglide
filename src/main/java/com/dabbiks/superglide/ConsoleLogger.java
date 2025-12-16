@@ -1,12 +1,19 @@
 package com.dabbiks.superglide;
 
 import org.bukkit.Bukkit;
-import org.bukkit.Server;
 
-public class Logger {
+import java.util.logging.Logger;
 
-    public void info(Type type) {
+public class ConsoleLogger {
 
+    Logger logger = Bukkit.getLogger();
+
+    public void info(Type type, String string) {
+        logger.info("[" + type.name() + "] " + string);
+    }
+
+    public void warning(Type type, String string) {
+        logger.warning("[" + type.name() + "] " + string);
     }
 
     public enum Type {

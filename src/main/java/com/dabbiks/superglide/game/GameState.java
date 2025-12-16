@@ -1,2 +1,4 @@
-package com.dabbiks.superglide.game;public class GameState {
+package com.dabbiks.superglide.game;
+
+public class GameState {
 }
