@@ -1,6 +1,7 @@
 package com.dabbiks.superglide.game.world;
 
 import com.dabbiks.superglide.ConsoleLogger;
+import com.dabbiks.superglide.utils.Constants;
 import org.bukkit.Bukkit;
 import org.bukkit.Location;
 import org.bukkit.Material;
@@ -72,8 +73,8 @@ public class NetherBiomeApplicator {
     }
 
     public void applyNetherBiomes(List<IslandData> islands) {
-        Bukkit.broadcastMessage("§cNakładanie biomów Netherowych...");
-        World world = Bukkit.getWorlds().get(0);
+        // ! DEBUG
+        World world = Constants.world;
         Random random = new Random();
 
         assignBiomesToIslands(islands, random);

@@ -2,7 +2,6 @@ package com.dabbiks.superglide.game.world;
 
 import com.dabbiks.superglide.ConsoleLogger;
 import com.dabbiks.superglide.utils.Constants;
-import org.bukkit.Bukkit;
 import org.bukkit.Location;
 import org.bukkit.Material;
 import org.bukkit.TreeType;
@@ -83,8 +82,8 @@ public class BiomeApplicator {
     private final double CHANCE_TREE_CHERRY = 0.035;
     private final double CHANCE_TREE_PALE = 0.020;
 
-    private final int BLOCKS_PER_TICK = 8000;
-    private final int TREES_PER_TICK = 4;
+    private final int BLOCKS_PER_TICK = 16000;
+    private final int TREES_PER_TICK = 8;
 
     // * ----------------------------------------------------------------------------
 
@@ -94,6 +93,8 @@ public class BiomeApplicator {
 
     private final Map<IslandData, CustomBiome> islandBiomes = new HashMap<>();
     private final StructureGenerator structureGen = new StructureGenerator();
+
+    private volatile boolean isCalculationDone = false;
 
     private static final Material[] MESA_PATTERN = {
             Material.TERRACOTTA, Material.WHITE_TERRACOTTA, Material.YELLOW_TERRACOTTA,
@@ -108,11 +109,14 @@ public class BiomeApplicator {
     }
 
     public void applyBiomes(List<IslandData> islands) {
-        ConsoleLogger.info(WORLD_GENERATOR, "Applying surface biomes");
+        ConsoleLogger.info(WORLD_GENERATOR, "Applying surface biomes (Global Scan)");
         World world = Constants.world;
         Random random = new Random();
 
         initializeGeneratorsAndBiomes(islands, random);
+
+        isCalculationDone = false;
+        applyChanges(world);
 
         new BukkitRunnable() {
             @Override
@@ -122,10 +126,24 @@ public class BiomeApplicator {
                 SimplexOctaveGenerator fernNoise = new SimplexOctaveGenerator(random, 2);
                 fernNoise.setScale(FERN_NOISE_SCALE);
 
+                int minX = Integer.MAX_VALUE, maxX = Integer.MIN_VALUE;
+                int minZ = Integer.MAX_VALUE, maxZ = Integer.MIN_VALUE;
+
                 for (IslandData island : islands) {
-                    processIslandStrict(island, islands, world, random, stoneNoise, fernNoise);
+                    int r = island.radius + SCAN_MARGIN_ADDITION;
+                    if (island.center.getBlockX() - r < minX) minX = island.center.getBlockX() - r;
+                    if (island.center.getBlockX() + r > maxX) maxX = island.center.getBlockX() + r;
+                    if (island.center.getBlockZ() - r < minZ) minZ = island.center.getBlockZ() - r;
+                    if (island.center.getBlockZ() + r > maxZ) maxZ = island.center.getBlockZ() + r;
                 }
-                applyChanges(world);
+
+                for (int x = minX; x <= maxX; x++) {
+                    for (int z = minZ; z <= maxZ; z++) {
+                        processCoordinateGlobal(x, z, islands, world, random, stoneNoise, fernNoise);
+                    }
+                }
+
+                isCalculationDone = true;
             }
         }.runTaskAsynchronously(plugin);
     }
@@ -140,41 +158,30 @@ public class BiomeApplicator {
         }
     }
 
-    private void processIslandStrict(IslandData targetIsland, List<IslandData> allIslands, World world, Random random, SimplexOctaveGenerator stoneNoise, SimplexOctaveGenerator fernNoise) {
-        int cx = targetIsland.center.getBlockX();
-        int cz = targetIsland.center.getBlockZ();
-        CustomBiome biome = islandBiomes.get(targetIsland);
+    private void processCoordinateGlobal(int x, int z, List<IslandData> islands, World world, Random random, SimplexOctaveGenerator stoneNoise, SimplexOctaveGenerator fernNoise) {
+        IslandData closest = getClosestIsland(x, z, islands);
+        if (closest == null) return;
 
-        int scanRange = targetIsland.radius + SCAN_MARGIN_ADDITION;
-        double maxScanDistSq = scanRange * scanRange;
+        double distSq = distanceSq(x, z, closest.center.getBlockX(), closest.center.getBlockZ());
+        double maxDist = closest.radius + SCAN_MARGIN_ADDITION;
 
-        for (int x = -scanRange; x <= scanRange; x++) {
-            for (int z = -scanRange; z <= scanRange; z++) {
-                processCoordinate(x, z, cx, cz, maxScanDistSq, targetIsland, allIslands, world, biome, random, stoneNoise, fernNoise);
-            }
-        }
+        if (distSq > maxDist * maxDist) return;
+
+        CustomBiome biome = islandBiomes.get(closest);
+        processFullColumn(world, x, z, biome, random, stoneNoise, fernNoise);
     }
 
-    private void processCoordinate(int x, int z, int cx, int cz, double maxScanDistSq, IslandData targetIsland, List<IslandData> allIslands, World world, CustomBiome biome, Random random, SimplexOctaveGenerator stoneNoise, SimplexOctaveGenerator fernNoise) {
-        if (x * x + z * z > maxScanDistSq) return;
-        int realX = cx + x;
-        int realZ = cz + z;
+    private IslandData getClosestIsland(int x, int z, List<IslandData> islands) {
+        IslandData closest = null;
+        double minDistSq = Double.MAX_VALUE;
 
-        IslandData closest = getClosestIsland(realX, realZ, allIslands, targetIsland);
-        if (closest != targetIsland) return;
+        for (IslandData island : islands) {
+            if (Math.abs(island.center.getBlockX() - x) > 350 || Math.abs(island.center.getBlockZ() - z) > 350) continue;
 
-        processFullColumn(world, realX, realZ, biome, random, stoneNoise, fernNoise);
-    }
-
-    private IslandData getClosestIsland(int x, int z, List<IslandData> islands, IslandData currentTarget) {
-        IslandData closest = currentTarget;
-        double minDistSq = distanceSq(x, z, currentTarget.center.getBlockX(), currentTarget.center.getBlockZ());
-        for (IslandData other : islands) {
-            if (other == currentTarget) continue;
-            if (Math.abs(other.center.getBlockX() - x) > 350 || Math.abs(other.center.getBlockZ() - z) > 350) continue;
-            double distSq = distanceSq(x, z, other.center.getBlockX(), other.center.getBlockZ());
+            double distSq = distanceSq(x, z, island.center.getBlockX(), island.center.getBlockZ());
             if (distSq < minDistSq) {
-                minDistSq = distSq; closest = other;
+                minDistSq = distSq;
+                closest = island;
             }
         }
         return closest;
@@ -510,15 +517,18 @@ public class BiomeApplicator {
 
                 processBlockQueue(world);
 
-                if (blockQueue.isEmpty()) {
+                if (blockQueue.isEmpty() && isCalculationDone) {
                     processStructureQueue(world);
                     processTreeQueue(world);
 
-                    if (treeQueue.isEmpty()) {
+                    if (treeQueue.isEmpty() && structureQueue.isEmpty()) {
                         removeDroppedItems(world);
                         ConsoleLogger.info(WORLD_GENERATOR, "Surface painted successfully");
                         this.cancel();
                     }
+                } else if (blockQueue.isEmpty()) {
+                    processStructureQueue(world);
+                    processTreeQueue(world);
                 }
             }
         }.runTaskTimer(plugin, 0L, 1L);
@@ -558,6 +568,7 @@ public class BiomeApplicator {
         } else if (bd instanceof PinkPetals pp) {
             int amount = Math.max(1, Math.min(4, data.petalCount));
             pp.setFlowerAmount(amount);
+            ((PinkPetals) bd).setFlowerAmount(4);
         }
     }
 
