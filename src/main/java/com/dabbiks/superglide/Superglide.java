@@ -7,11 +7,14 @@ import org.bukkit.plugin.java.JavaPlugin;
 public final class Superglide extends JavaPlugin {
 
     public static Plugin plugin;
+    public static Superglide instance;
+
     public static PersistentDataJson persistentDataJson;
 
     @Override
     public void onEnable() {
         plugin = this;
+        instance = this;
         persistentDataJson = new PersistentDataJson();
     }
 
