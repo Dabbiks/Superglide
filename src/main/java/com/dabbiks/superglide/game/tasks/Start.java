@@ -2,9 +2,13 @@ package com.dabbiks.superglide.game.tasks;
 
 import com.dabbiks.superglide.game.state.GameState;
 import com.dabbiks.superglide.game.state.GameStateManager;
+import com.dabbiks.superglide.game.teams.TeamManager;
+import com.dabbiks.superglide.game.teams.TeamTeleport;
+import com.dabbiks.superglide.player.state.PlayerState;
 import com.dabbiks.superglide.player.state.PlayerStateManager;
 import com.dabbiks.superglide.tasks.Task;
 import com.dabbiks.superglide.utils.Constants;
+import org.bukkit.Location;
 import org.bukkit.Sound;
 import org.bukkit.entity.Player;
 
@@ -41,9 +45,15 @@ public class Start extends Task {
         if (gameState == GameState.START && countdown < 0) {
             GameStateManager.setGameState(GameState.PLAY);
             Constants.world.setTime(1000);
+
+            TeamManager.distributePlayersToExistingTeams();
+            List<Location> locations = TeamTeleport.getSpawnLocations();
+            TeamTeleport.setupTeamsAndTeleport(locations, TeamManager.scoreboard.getTeams().stream().toList());
+
+            for (Player player : groupU.getAllPlayers()) {
+                PlayerStateManager.setPlayerState(player.getUniqueId(), PlayerState.PLAYING);
+            }
         }
-
-
     }
 
     public static int getCountdown() { return countdown; }

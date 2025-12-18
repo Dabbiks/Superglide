@@ -1,6 +1,7 @@
 package com.dabbiks.superglide;
 
 import com.dabbiks.superglide.player.data.persistent.PersistentDataJson;
+import com.dabbiks.superglide.utils.other.TimeUtils;
 import com.dabbiks.superglide.utils.player.GroupUtils;
 import com.dabbiks.superglide.utils.player.MessageUtils;
 import com.dabbiks.superglide.utils.player.SoundUtils;
@@ -19,6 +20,7 @@ public final class Superglide extends JavaPlugin {
     public static MessageUtils messageU;
     public static SoundUtils soundU;
     public static TitleUtils titleU;
+    public static TimeUtils timeU;
 
     @Override
     public void onEnable() {
@@ -31,6 +33,7 @@ public final class Superglide extends JavaPlugin {
         messageU = new MessageUtils();
         soundU   = new SoundUtils();
         titleU   = new TitleUtils();
+        timeU    = new TimeUtils();
     }
 
     @Override

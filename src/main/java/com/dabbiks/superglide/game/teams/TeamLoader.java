@@ -7,7 +7,7 @@ public class TeamLoader {
 
     private static final List<TeamData> teams = new ArrayList<>();
 
-    public static void createTeams() {
+    public static void initiateTeams() {
         teams.add(new TeamData("Team 1", "Baner", "BI", "SI"));
         teams.add(new TeamData("Team 1", "Baner", "BI", "SI"));
         teams.add(new TeamData("Team 1", "Baner", "BI", "SI"));
@@ -18,11 +18,9 @@ public class TeamLoader {
         teams.add(new TeamData("Team 1", "Baner", "BI", "SI"));
     }
 
-    public static List<TeamData> getTeams() { return teams; }
-
-    public static TeamData getTeamByName(String name) {
+    public static TeamData createTeams() {
         for (TeamData team : teams) {
-            if (team.getName().equals(name)) return team;
+            TeamManager.createTeam(team.getName());
         }
         return null;
     }
