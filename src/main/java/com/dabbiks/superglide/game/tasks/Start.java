@@ -38,6 +38,10 @@ public class Start extends Task {
             titleU.sendTitle(players, "", "Odliczanie przerwane", 30);
             countdown = Constants.countdown;
         }
+        if (gameState == GameState.START && countdown < 0) {
+            GameStateManager.setGameState(GameState.PLAY);
+            Constants.world.setTime(1000);
+        }
 
 
     }
