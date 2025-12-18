@@ -1,9 +1,11 @@
 package com.dabbiks.superglide.game.tasks;
 
+import com.dabbiks.superglide.ConsoleLogger;
 import com.dabbiks.superglide.game.state.GameState;
 import com.dabbiks.superglide.game.state.GameStateManager;
 import com.dabbiks.superglide.game.teams.TeamManager;
 import com.dabbiks.superglide.game.teams.TeamTeleport;
+import com.dabbiks.superglide.game.world.WorldManager;
 import com.dabbiks.superglide.player.state.PlayerState;
 import com.dabbiks.superglide.player.state.PlayerStateManager;
 import com.dabbiks.superglide.tasks.Task;
@@ -24,19 +26,28 @@ public class Start extends Task {
 
     protected void tick() {
 
+        ConsoleLogger.warning(ConsoleLogger.Type.PLUGIN, countdown + "");
+        if (!WorldManager.isWorldGenerated) return;
+
         List<Player> players = groupU.getAllPlayers();
         GameState gameState = GameStateManager.getGameState();
 
         int playerCount = players.size();
 
+        if (gameState == null) {
+            gameState = GameState.WAIT;
+            GameStateManager.setGameState(GameState.WAIT);
+        }
         if (gameState == GameState.START && countdown >= 0) {
             titleU.sendTitle(players, "", "Odliczanie", 30);
             countdown--;
         }
         if (gameState == GameState.WAIT && playerCount >= Constants.minPlayerCount) {
+            gameState = GameState.START;
             GameStateManager.setGameState(GameState.START);
         }
         if (gameState == GameState.START && playerCount < Constants.minPlayerCount) {
+            gameState = GameState.WAIT;
             GameStateManager.setGameState(GameState.WAIT);
             soundU.playSoundToPlayer(players, Sound.ENTITY_VILLAGER_NO, 0.3F, 1);
             titleU.sendTitle(players, "", "Odliczanie przerwane", 30);

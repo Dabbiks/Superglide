@@ -1,11 +1,17 @@
 package com.dabbiks.superglide;
 
+import com.dabbiks.superglide.game.teams.TeamLoader;
+import com.dabbiks.superglide.game.teams.TeamManager;
+import com.dabbiks.superglide.game.world.WorldManager;
 import com.dabbiks.superglide.player.data.persistent.PersistentDataJson;
+import com.dabbiks.superglide.player.traffic.Join;
+import com.dabbiks.superglide.tasks.TaskManager;
 import com.dabbiks.superglide.utils.other.TimeUtils;
 import com.dabbiks.superglide.utils.player.GroupUtils;
 import com.dabbiks.superglide.utils.player.MessageUtils;
 import com.dabbiks.superglide.utils.player.SoundUtils;
 import com.dabbiks.superglide.utils.player.TitleUtils;
+import org.bukkit.Bukkit;
 import org.bukkit.plugin.Plugin;
 import org.bukkit.plugin.java.JavaPlugin;
 
@@ -34,6 +40,17 @@ public final class Superglide extends JavaPlugin {
         soundU   = new SoundUtils();
         titleU   = new TitleUtils();
         timeU    = new TimeUtils();
+
+        // * -----------------------------------------
+
+        TeamManager.removeAllTeams();
+        TeamLoader.initiateTeams();
+        TeamLoader.createTeams();
+
+        WorldManager.createWorld();
+
+        new TaskManager();
+        Bukkit.getPluginManager().registerEvents(new Join(), this);
     }
 
     @Override

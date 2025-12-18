@@ -9,20 +9,19 @@ public class TeamLoader {
 
     public static void initiateTeams() {
         teams.add(new TeamData("Team 1", "Baner", "BI", "SI"));
-        teams.add(new TeamData("Team 1", "Baner", "BI", "SI"));
-        teams.add(new TeamData("Team 1", "Baner", "BI", "SI"));
-        teams.add(new TeamData("Team 1", "Baner", "BI", "SI"));
-        teams.add(new TeamData("Team 1", "Baner", "BI", "SI"));
-        teams.add(new TeamData("Team 1", "Baner", "BI", "SI"));
-        teams.add(new TeamData("Team 1", "Baner", "BI", "SI"));
-        teams.add(new TeamData("Team 1", "Baner", "BI", "SI"));
+        teams.add(new TeamData("Team 2", "Baner", "BI", "SI"));
+        teams.add(new TeamData("Team 3", "Baner", "BI", "SI"));
+        teams.add(new TeamData("Team 4", "Baner", "BI", "SI"));
+        teams.add(new TeamData("Team 5", "Baner", "BI", "SI"));
+        teams.add(new TeamData("Team 6", "Baner", "BI", "SI"));
+        teams.add(new TeamData("Team 7", "Baner", "BI", "SI"));
+        teams.add(new TeamData("Team 8", "Baner", "BI", "SI"));
     }
 
-    public static TeamData createTeams() {
+    public static void createTeams() {
         for (TeamData team : teams) {
             TeamManager.createTeam(team.getName());
         }
-        return null;
     }
 
 }

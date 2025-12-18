@@ -9,13 +9,13 @@ public class Constants {
 
     public static final int countdown      = 60;
     public static final int teamSize       = 1;
-    public static final int minPlayerCount = teamSize * 4;
-    public static final int maxPlayerCount = teamSize * 16;
+    public static final int minPlayerCount = teamSize * 1;
+    public static final int maxPlayerCount = teamSize * 8;
 
     // * WORLD
 
     public static final String worldName  = "game";
     public static final double borderSize = 400;
-    public static World world = Bukkit.getWorld(worldName);
+    public static World world;
 
 }
