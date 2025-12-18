@@ -15,15 +15,16 @@ public class WorldManager {
         File worldFolder     = new File(Bukkit.getWorldContainer(), Constants.worldName);
 
         if (worldFolder.exists()) {
-            generateMap();
+            WorldCreator creator = new WorldCreator(Constants.worldName);
+            creator.createWorld();
+            ConsoleLogger.info(ConsoleLogger.Type.WORLD_GENERATOR, "World successfully created");
             return;
         }
 
-        WorldCreator creator = new WorldCreator(Constants.worldName);
-        creator.createWorld();
         Constants.world = Bukkit.getWorld(Constants.worldName);
 
-        ConsoleLogger.info(ConsoleLogger.Type.WORLD_GENERATOR, "World successfully created");
+        setRules();
+        generateMap();
     }
 
     public void setRules() {
