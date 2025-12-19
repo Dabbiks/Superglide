@@ -23,5 +23,4 @@ public class TeamLoader {
             TeamManager.createTeam(team.getName());
         }
     }
-
 }

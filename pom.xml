@@ -56,12 +56,6 @@
             <url>https://repo.papermc.io/repository/maven-public/</url>
         </repository>
 
-        <repository> <!-- INVENTORY FRAMEWORK -->
-            <id>tcoded-releases</id>
-            <name>TCoded Releases</name>
-            <url>https://repo.tcoded.com/releases</url>
-        </repository>
-
         <repository> <!-- FAWE -->
             <id>enginehub</id>
             <url>https://maven.enginehub.org/repo/</url>
@@ -95,10 +89,10 @@
             <scope>provided</scope>
         </dependency>
 
-        <dependency> <!-- INVENTORY FRAMEWORK -->
-            <groupId>me.devnatan</groupId>
-            <artifactId>inventory-framework-platform-paper</artifactId>
-            <version>3.7.1</version>
+        <dependency> <!-- INVENTORY GUI -->
+            <groupId>fr.minuskube.inv</groupId>
+            <artifactId>smart-invs</artifactId>
+            <version>1.2.7</version>
         </dependency>
 
         <dependency> <!-- FAWE CORE -->

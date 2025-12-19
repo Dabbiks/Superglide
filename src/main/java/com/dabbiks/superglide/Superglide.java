@@ -50,6 +50,7 @@ public final class Superglide extends JavaPlugin {
         WorldManager.createWorld();
 
         new TaskManager();
+
         Bukkit.getPluginManager().registerEvents(new Join(), this);
     }
 
