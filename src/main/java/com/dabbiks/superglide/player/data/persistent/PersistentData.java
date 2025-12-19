@@ -1,5 +1,6 @@
 package com.dabbiks.superglide.player.data.persistent;
 
+import com.dabbiks.superglide.cosmetics.Cage;
 import com.google.gson.annotations.Expose;
 
 import java.util.HashMap;
@@ -26,5 +27,12 @@ public class PersistentData {
     public void addStat(PersistentStats stat, int amount) { stats.put(stat, getStats().getOrDefault(stat, 0) + amount); }
     public void removeStat(PersistentStats stat, int amount) { stats.put(stat, getStats().getOrDefault(stat, 0) - amount); }
     public void setStat(PersistentStats stat, int amount) { stats.put(stat, amount); }
+
+    // * COSMETICS
+
+    private Cage cage;
+
+    public Cage getCage() { return cage; }
+    public void setCage(Cage cage) { this.cage = cage; }
 
 }
