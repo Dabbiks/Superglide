@@ -18,7 +18,7 @@ import java.util.List;
 
 import static com.dabbiks.superglide.Superglide.*;
 
-public class Start extends Task {
+public class GameStart extends Task {
 
     private static int countdown = Constants.countdown;
 
@@ -26,7 +26,6 @@ public class Start extends Task {
 
     protected void tick() {
 
-        ConsoleLogger.warning(ConsoleLogger.Type.PLUGIN, countdown + "");
         if (!WorldManager.isWorldGenerated) return;
 
         List<Player> players = groupU.getAllPlayers();
@@ -39,7 +38,8 @@ public class Start extends Task {
             GameStateManager.setGameState(GameState.WAIT);
         }
         if (gameState == GameState.START && countdown >= 0) {
-            titleU.sendTitle(players, "", "Odliczanie", 30);
+            titleU.sendTitle(players, "", "" + countdown, 30);
+            soundU.playSoundToPlayer(players, Sound.BLOCK_NOTE_BLOCK_BANJO, 0.5F, 1);
             countdown--;
         }
         if (gameState == GameState.WAIT && playerCount >= Constants.minPlayerCount) {
@@ -58,7 +58,7 @@ public class Start extends Task {
             Constants.world.setTime(1000);
 
             TeamManager.distributePlayersToExistingTeams();
-            List<Location> locations = TeamTeleport.getSpawnLocations();
+            List<Location> locations = TeamTeleport.calculateSpawnLocations();
             TeamTeleport.setupTeamsAndTeleport(locations, TeamManager.scoreboard.getTeams().stream().toList());
 
             for (Player player : groupU.getAllPlayers()) {

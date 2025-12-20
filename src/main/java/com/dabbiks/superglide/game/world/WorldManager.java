@@ -51,8 +51,6 @@ public class WorldManager {
             ConsoleLogger.info(ConsoleLogger.Type.WORLD_GENERATOR, "Map generator started");
             new WorldGenManager().startProcess();
         }, 600L);
-
-        isWorldGenerated = true;
     }
 
 }

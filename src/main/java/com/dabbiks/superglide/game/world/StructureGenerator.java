@@ -90,7 +90,7 @@ public class StructureGenerator {
     private final Set<Material> INFECTABLE_BLOCKS = EnumSet.of(
             Material.SAND, Material.GRASS_BLOCK, Material.RED_SAND, Material.PODZOL,
             Material.DIRT, Material.COARSE_DIRT, Material.GRAVEL, Material.SNOW_BLOCK,
-            Material.STONE
+            Material.STONE, Material.WHITE_WOOL
     );
 
     public StructureGenerator() {
@@ -120,16 +120,16 @@ public class StructureGenerator {
         switch (type) {
             case JUNGLE_TEMPLE:
                 if (jungleTempleCount >= 2) return false;
-                return isSafeDistance(loc, 50);
+                return isSafeDistance(loc, 150);
             case PYRAMID:
                 if (pyramidCount >= 2) return false;
-                return isSafeDistance(loc, 80);
+                return isSafeDistance(loc, 150);
             case PORTAL:
                 if (portalCount >= 4) return false;
-                return isSafeDistance(loc, 60);
+                return isSafeDistance(loc, 200);
             case MINE:
                 if (mineCount >= 2) return false;
-                return isSafeDistance(loc, 100);
+                return isSafeDistance(loc, 50);
             default:
                 return false;
         }

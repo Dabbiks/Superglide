@@ -30,9 +30,9 @@ public class BiomeApplicator {
 
     // * CONFIG
 
-    private final int SCAN_MARGIN_ADDITION = 100;
-    private final int SCAN_MAX_Y = 255;
-    private final int SCAN_MIN_Y = 130;
+    private final int SCAN_MARGIN_ADDITION = 95;
+    private final int SCAN_MAX_Y = 215;
+    private final int SCAN_MIN_Y = 110;
 
     private final double BIOME_NOISE_SCALE = 0.002;
     private final int BIOME_NOISE_OCTAVES = 8;
@@ -82,8 +82,8 @@ public class BiomeApplicator {
     private final double CHANCE_TREE_CHERRY = 0.035;
     private final double CHANCE_TREE_PALE = 0.020;
 
-    private final int BLOCKS_PER_TICK = 16000;
-    private final int TREES_PER_TICK = 8;
+    private final int BLOCKS_PER_TICK = 32000;
+    private final int TREES_PER_TICK = 16;
 
     // * ----------------------------------------------------------------------------
 
@@ -524,6 +524,7 @@ public class BiomeApplicator {
                     if (treeQueue.isEmpty() && structureQueue.isEmpty()) {
                         removeDroppedItems(world);
                         ConsoleLogger.info(WORLD_GENERATOR, "Surface painted successfully");
+                        WorldManager.isWorldGenerated = true;
                         this.cancel();
                     }
                 } else if (blockQueue.isEmpty()) {

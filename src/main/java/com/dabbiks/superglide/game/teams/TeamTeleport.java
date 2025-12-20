@@ -19,7 +19,9 @@ import static com.dabbiks.superglide.Superglide.plugin;
 
 public class TeamTeleport {
 
-    public static List<Location> getSpawnLocations() {
+    private static List<Location> spawnLocations = new ArrayList<>();
+
+    public static List<Location> calculateSpawnLocations() {
         List<Location> locations = new ArrayList<>();
         World world = Constants.world;
 
@@ -39,6 +41,8 @@ public class TeamTeleport {
 
             locations.add(new Location(world, x, y, z));
         }
+        setSpawnLocations(locations);
+
         return locations;
     }
 
@@ -57,10 +61,10 @@ public class TeamTeleport {
 
             players.getFirst();
             PersistentData data = PersistentDataManager.getData(players.getFirst().getUniqueId());
-            String schematic = data.getCage().name().toLowerCase();
 
-            if (schematic.isEmpty()) schematic = "default_cage";
-            data.setCage(Cage.DEFAULT_CAGE);
+            String schematic = "";
+            if (data.getCage() == null) { schematic = "default_cage.schem"; data.setCage(Cage.DEFAULT_CAGE); }
+            if (schematic.isEmpty()) schematic = data.getCage().getName().toLowerCase();
 
             SchematicPaster.pasteSchematic(schematic, spawnLoc);
 
@@ -71,7 +75,31 @@ public class TeamTeleport {
                     player.teleport(tpLoc);
                 }
             }, 20L);
+
+            Bukkit.getScheduler().runTaskLater(plugin, () -> {
+                for (Location location : spawnLocations) {
+
+                    int radius = 5;
+
+                    for (int x = location.getBlockX() - radius; x <= location.getBlockX() + radius; x++) {
+                        for (int y = location.getBlockY() - radius; y <= location.getBlockY() + radius; y++) {
+                            for (int z = location.getBlockZ() - radius; z <= location.getBlockZ() + radius; z++) {
+
+                                location.getWorld().getBlockAt(x, y, z).setType(Material.AIR);
+
+                            }
+                        }
+                    }
+                }
+            }, 180L);
         }
     }
 
+    private static void setSpawnLocations(List<Location> locations) {
+        spawnLocations = locations;
+    }
+
+    public List<Location> getSpawnLocations() {
+        return spawnLocations;
+    }
 }

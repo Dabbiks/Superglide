@@ -1,10 +1,9 @@
 package com.dabbiks.superglide.tasks;
 
-import com.dabbiks.superglide.game.tasks.Start;
-import com.dabbiks.superglide.game.tasks.Time;
+import com.dabbiks.superglide.game.tasks.GameStart;
+import com.dabbiks.superglide.game.tasks.GameTime;
 import org.bukkit.Bukkit;
 import org.bukkit.scheduler.BukkitRunnable;
-import org.bukkit.scoreboard.Scoreboard;
 
 import java.util.ArrayList;
 import java.util.List;
@@ -18,8 +17,8 @@ public class TaskManager extends BukkitRunnable {
     public TaskManager() {
         tasks = new ArrayList<>();
 
-        tasks.add(new Start());
-        tasks.add(new Time());
+        tasks.add(new GameStart());
+        tasks.add(new GameTime());
 
         runTaskTimer(plugin, 0, 1);
     }

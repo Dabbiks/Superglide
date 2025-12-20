@@ -4,9 +4,9 @@ import com.dabbiks.superglide.game.state.GameState;
 import com.dabbiks.superglide.game.state.GameStateManager;
 import com.dabbiks.superglide.tasks.Task;
 
-import static com.dabbiks.superglide.Superglide.timeU;
+import static com.dabbiks.superglide.Superglide.*;
 
-public class Time extends Task {
+public class GameTime extends Task {
 
     protected long getPeriod() {
         return 20;
@@ -15,6 +15,7 @@ public class Time extends Task {
     protected void tick() {
         if (!(GameStateManager.getGameState() == GameState.PLAY)) return;
         timeU.incrementTime();
+        messageU.sendMessage(groupU.getAllPlayers(), timeU.getFormattedTime());
     }
 
 }

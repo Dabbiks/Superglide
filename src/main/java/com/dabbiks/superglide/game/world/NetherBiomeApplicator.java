@@ -27,7 +27,7 @@ public class NetherBiomeApplicator {
     // ZAKRES SKANOWANIA
     private final int SCAN_MAX_Y = 139;
     private final int SCAN_MIN_Y = 39;
-    private final int SCAN_MARGIN_ADDITION = 50;
+    private final int SCAN_MARGIN_ADDITION = 85;
 
     // MATERIAŁY BAZOWE
     private final Material TARGET_WOOL = Material.RED_WOOL;
@@ -57,7 +57,7 @@ public class NetherBiomeApplicator {
     private final double CHANCE_PORTAL = 0.003;
 
     // WYDAJNOŚĆ
-    private final int BLOCKS_PER_TICK = 4000;
+    private final int BLOCKS_PER_TICK = 8000;
     private final int TREES_PER_TICK = 4;
 
     private final Queue<NetherBlockData> blockQueue = new ConcurrentLinkedQueue<>();
