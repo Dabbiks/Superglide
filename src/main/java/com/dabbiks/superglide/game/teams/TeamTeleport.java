@@ -1,5 +1,9 @@
 package com.dabbiks.superglide.game.teams;
 
+import com.dabbiks.superglide.cosmetics.cages.Cage;
+import com.dabbiks.superglide.game.world.SchematicPaster;
+import com.dabbiks.superglide.player.data.persistent.PersistentData;
+import com.dabbiks.superglide.player.data.persistent.PersistentDataManager;
 import com.dabbiks.superglide.utils.Constants;
 import org.bukkit.Bukkit;
 import org.bukkit.Location;
@@ -51,8 +55,14 @@ public class TeamTeleport {
 
             Location spawnLoc = locations.get(i);
 
-            // ! PRZEPUSTKA KLATKI
-            spawnLoc.getBlock().setType(Material.STONE);
+            players.getFirst();
+            PersistentData data = PersistentDataManager.getData(players.getFirst().getUniqueId());
+            String schematic = data.getCage().name().toLowerCase();
+
+            if (schematic.isEmpty()) schematic = "default_cage";
+            data.setCage(Cage.DEFAULT_CAGE);
+
+            SchematicPaster.pasteSchematic(schematic, spawnLoc);
 
             Location tpLoc = spawnLoc.clone().add(0.5, 1, 0.5);
 

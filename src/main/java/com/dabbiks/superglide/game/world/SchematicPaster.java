@@ -28,18 +28,18 @@ import static com.dabbiks.superglide.Superglide.plugin;
 
 public class SchematicPaster {
 
-    private final File schematicsFolder;
-    private final Random random;
+    private static File schematicsFolder;
+    private static Random random;
 
     public SchematicPaster() {
-        this.schematicsFolder = new File(plugin.getDataFolder(), "schematics");
-        if (!this.schematicsFolder.exists()) {
-            this.schematicsFolder.mkdirs();
+        schematicsFolder = new File(plugin.getDataFolder(), "schematics");
+        if (!schematicsFolder.exists()) {
+            schematicsFolder.mkdirs();
         }
-        this.random = new Random();
+        random = new Random();
     }
 
-    public void pasteSchematic(String fileName, Location location) {
+    public static void pasteSchematic(String fileName, Location location) {
         File file = new File(schematicsFolder, fileName);
 
         if (!file.exists()) {

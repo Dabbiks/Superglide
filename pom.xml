@@ -60,6 +60,11 @@
             <id>enginehub</id>
             <url>https://maven.enginehub.org/repo/</url>
         </repository>
+
+        <repository> <!-- INVUI -->
+            <id>xenondevs</id>
+            <url>https://repo.xenondevs.xyz/releases</url>
+        </repository>
     </repositories>
 
     <dependencyManagement>
@@ -89,10 +94,11 @@
             <scope>provided</scope>
         </dependency>
 
-        <dependency> <!-- INVENTORY GUI -->
-            <groupId>fr.minuskube.inv</groupId>
-            <artifactId>smart-invs</artifactId>
-            <version>1.2.7</version>
+        <dependency> <!-- INVUI -->
+            <groupId>xyz.xenondevs.invui</groupId>
+            <artifactId>invui</artifactId>
+            <version>1.49</version>
+            <type>pom</type>
         </dependency>
 
         <dependency> <!-- FAWE CORE -->

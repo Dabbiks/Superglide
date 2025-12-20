@@ -1,7 +1,6 @@
 package com.dabbiks.superglide.player.data.persistent;
 
-import com.dabbiks.superglide.cosmetics.Cage;
-import com.google.gson.annotations.Expose;
+import com.dabbiks.superglide.cosmetics.cages.Cage;
 
 import java.util.HashMap;
 import java.util.Map;
