@@ -40,6 +40,14 @@
                         </goals>
                     </execution>
                 </executions>
+                <configuration> <!-- FASTBOARD -->
+                    <relocations>
+                        <relocation>
+                            <pattern>fr.mrmicky.fastboard</pattern>
+                            <shadedPattern>com.dabbiks.uHC</shadedPattern>
+                        </relocation>
+                    </relocations>
+                </configuration>
             </plugin>
         </plugins>
         <resources>
@@ -92,6 +100,12 @@
             <artifactId>adventure-api</artifactId>
             <version>4.25.0</version>
             <scope>provided</scope>
+        </dependency>
+
+        <dependency> <!-- FASTBOARD -->
+            <groupId>fr.mrmicky</groupId>
+            <artifactId>fastboard</artifactId>
+            <version>2.1.5</version>
         </dependency>
 
         <dependency> <!-- INVUI -->
