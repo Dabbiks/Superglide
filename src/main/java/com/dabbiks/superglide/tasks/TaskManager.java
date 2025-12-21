@@ -2,6 +2,7 @@ package com.dabbiks.superglide.tasks;
 
 import com.dabbiks.superglide.game.tasks.GameStart;
 import com.dabbiks.superglide.game.tasks.GameTime;
+import com.dabbiks.superglide.player.tasks.BoardUpdate;
 import org.bukkit.Bukkit;
 import org.bukkit.scheduler.BukkitRunnable;
 
@@ -19,6 +20,8 @@ public class TaskManager extends BukkitRunnable {
 
         tasks.add(new GameStart());
         tasks.add(new GameTime());
+
+        tasks.add(new BoardUpdate());
 
         runTaskTimer(plugin, 0, 1);
     }
