@@ -8,12 +8,19 @@ import java.util.Map;
 
 public class ItemManager {
 
+    private int gunInstanceIndex = 0;
+
     public Map<String, ItemDefinition> itemDefinitions = new HashMap<>();
     public Map<String, GunDefinition> gunDefinitions = new HashMap<>();
     public Map<Integer, GunInstance> gunInstances = new HashMap<>();
 
     public ItemDefinition getItem(String identifier) {
         return itemDefinitions.getOrDefault(identifier, null);
+    }
+
+    public int getNextGunInstanceIndex() {
+        gunInstanceIndex++;
+        return gunInstanceIndex;
     }
 
 }

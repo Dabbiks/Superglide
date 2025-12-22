@@ -10,8 +10,7 @@ public class GunInstance {
     private final int reloadCustomModelData;
     private int skinId;
 
-    public GunInstance(GunDefinition gun, int ammoAmount, GunFireMode fireMode, int skinId, int customModelData) {
-        this.gun = gun;
+    public GunInstance(int ammoAmount, GunFireMode fireMode, int skinId, int customModelData) {
         this.ammoAmount = ammoAmount;
         this.currentFireMode = fireMode;
         this.skinId = skinId;
@@ -19,9 +18,6 @@ public class GunInstance {
         currentShotCooldown = 0;
         reloadCustomModelData = customModelData + 1;
     }
-
-    public GunDefinition getGun() { return gun; }
-    public void setGun(GunDefinition gun) { this.gun = gun; }
 
     public int getAmmoAmount() { return ammoAmount; }
     public void setAmmoAmount(int ammoAmount) { this.ammoAmount = ammoAmount; }
