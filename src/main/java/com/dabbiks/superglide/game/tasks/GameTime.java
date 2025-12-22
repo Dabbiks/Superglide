@@ -15,7 +15,7 @@ public class GameTime extends Task {
     protected void tick() {
         if (!(GameStateManager.getGameState() == GameState.PLAY)) return;
         timeU.incrementTime();
-        messageU.sendMessage(groupU.getAllPlayers(), timeU.getFormattedTime());
+        messageU.sendMessageToPlayers(groupU.getAllPlayers(), timeU.getFormattedTime());
     }
 
 }

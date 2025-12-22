@@ -1,6 +1,5 @@
 package com.dabbiks.superglide.game.tasks;
 
-import com.dabbiks.superglide.ConsoleLogger;
 import com.dabbiks.superglide.game.state.GameState;
 import com.dabbiks.superglide.game.state.GameStateManager;
 import com.dabbiks.superglide.game.teams.TeamManager;
@@ -38,8 +37,8 @@ public class GameStart extends Task {
             GameStateManager.setGameState(GameState.WAIT);
         }
         if (gameState == GameState.START && countdown >= 0) {
-            titleU.sendTitle(players, "", "" + countdown, 30);
-            soundU.playSoundToPlayer(players, Sound.BLOCK_NOTE_BLOCK_BANJO, 0.5F, 1);
+            titleU.sendTitleToPlayers(players, "", "" + countdown, 30);
+            soundU.playSoundToPlayers(players, Sound.BLOCK_NOTE_BLOCK_BANJO, 0.5F, 1);
             countdown--;
         }
         if (gameState == GameState.WAIT && playerCount >= Constants.minPlayerCount) {
@@ -49,8 +48,8 @@ public class GameStart extends Task {
         if (gameState == GameState.START && playerCount < Constants.minPlayerCount) {
             gameState = GameState.WAIT;
             GameStateManager.setGameState(GameState.WAIT);
-            soundU.playSoundToPlayer(players, Sound.ENTITY_VILLAGER_NO, 0.3F, 1);
-            titleU.sendTitle(players, "", "Odliczanie przerwane", 30);
+            soundU.playSoundToPlayers(players, Sound.ENTITY_VILLAGER_NO, 0.3F, 1);
+            titleU.sendTitleToPlayers(players, "", "Odliczanie przerwane", 30);
             countdown = Constants.countdown;
         }
         if (gameState == GameState.START && countdown < 0) {
