@@ -19,8 +19,6 @@ public class GunBuilder extends ItemBuilder {
 
     @Override
     public ItemStack build() {
-        ItemManager manager = itemManager;
-
         ItemStack item = super.build();
         NBTItem nbt = new NBTItem(item);
 
