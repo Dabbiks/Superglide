@@ -33,6 +33,5 @@ public class Join implements Listener {
             data.addStat(PersistentStats.COINS, 500);
         }
 
-
     }
 }

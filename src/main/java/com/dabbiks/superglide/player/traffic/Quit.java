@@ -1,6 +1,7 @@
 package com.dabbiks.superglide.player.traffic;
 
 import com.dabbiks.superglide.player.data.persistent.PersistentDataManager;
+import com.dabbiks.superglide.player.scoreboard.BoardManager;
 import com.dabbiks.superglide.player.state.PlayerState;
 import com.dabbiks.superglide.player.state.PlayerStateManager;
 import org.bukkit.entity.Player;
