@@ -1,4 +1,4 @@
-package com.dabbiks.superglide.game.world;
+package com.dabbiks.superglide.game.world.generator;
 
 import com.dabbiks.superglide.ConsoleLogger;
 import com.dabbiks.superglide.utils.Constants;
@@ -22,7 +22,7 @@ public class WorldGenManager {
 
     private final int MAP_RADIUS = 400;
     private final int CENTER_Y = 200;
-    private final int CLEAN_RADIUS = 700;
+    private final int CLEAN_RADIUS = 500;
     private final int CLEAN_MIN_Y = 0;
     private final int CLEAN_MAX_Y = 250;
 
@@ -48,10 +48,10 @@ public class WorldGenManager {
     private final double BRIDGE_RADIUS_BASE = 0.1;
 
     // * EFFICIENCY
-    private final int BLOCKS_PER_TICK = 8000;
+    private final int BLOCKS_PER_TICK = 24000;
     private final long CLEANING_TIME_LIMIT_MS = 40;
-    private final long DELAY_BEFORE_GENERATION = 200L;
-    private final long DELAY_BEFORE_BIOMES = 100L;
+    private final long DELAY_BEFORE_GENERATION = 20;
+    private final long DELAY_BEFORE_BIOMES = 20;
 
     // * ------------------------------------------------------------------------
 

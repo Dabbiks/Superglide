@@ -1,10 +1,10 @@
-package com.dabbiks.superglide.game.world;
+package com.dabbiks.superglide.game.world.generator;
 
 import org.bukkit.Location;
 import org.bukkit.Material;
 import org.bukkit.World;
 import org.bukkit.util.noise.SimplexOctaveGenerator;
-import com.dabbiks.superglide.game.world.WorldGenManager.BlockSetData;
+import com.dabbiks.superglide.game.world.generator.WorldGenManager.BlockSetData;
 
 import java.util.Queue;
 import java.util.Random;

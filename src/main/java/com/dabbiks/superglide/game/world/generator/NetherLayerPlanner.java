@@ -1,9 +1,9 @@
-package com.dabbiks.superglide.game.world;
+package com.dabbiks.superglide.game.world.generator;
 
 import org.bukkit.Location;
 import org.bukkit.Material;
 import org.bukkit.World;
-import com.dabbiks.superglide.game.world.WorldGenManager.IslandData;
+import com.dabbiks.superglide.game.world.generator.WorldGenManager.IslandData;
 
 import java.util.List;
 import java.util.Random;

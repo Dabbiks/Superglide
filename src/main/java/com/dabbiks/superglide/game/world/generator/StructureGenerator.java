@@ -1,4 +1,4 @@
-package com.dabbiks.superglide.game.world;
+package com.dabbiks.superglide.game.world.generator;
 
 import org.bukkit.Location;
 import org.bukkit.Material;

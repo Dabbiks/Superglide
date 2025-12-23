@@ -1,11 +1,8 @@
-package com.dabbiks.superglide.game.world;
+package com.dabbiks.superglide.game.world.generator;
 
 import com.dabbiks.superglide.ConsoleLogger;
 import com.dabbiks.superglide.utils.Constants;
 import org.bukkit.*;
-
-import java.io.Console;
-import java.io.File;
 
 import static com.dabbiks.superglide.Superglide.plugin;
 
@@ -50,7 +47,7 @@ public class WorldManager {
         plugin.getServer().getScheduler().runTaskLater(plugin, () -> {
             ConsoleLogger.info(ConsoleLogger.Type.WORLD_GENERATOR, "Map generator started");
             new WorldGenManager().startProcess();
-        }, 600L);
+        }, 20);
     }
 
 }

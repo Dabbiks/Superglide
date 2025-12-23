@@ -1,6 +1,7 @@
-package com.dabbiks.superglide.game.world;
+package com.dabbiks.superglide.game.world.generator;
 
 import com.dabbiks.superglide.ConsoleLogger;
+import com.dabbiks.superglide.VisualizePath;
 import com.dabbiks.superglide.utils.Constants;
 import org.bukkit.Location;
 import org.bukkit.Material;
@@ -17,25 +18,33 @@ import org.bukkit.entity.Entity;
 import org.bukkit.entity.Item;
 import org.bukkit.scheduler.BukkitRunnable;
 import org.bukkit.util.noise.SimplexOctaveGenerator;
-import com.dabbiks.superglide.game.world.WorldGenManager.IslandData;
-import com.dabbiks.superglide.game.world.StructureGenerator.StructureType;
+import com.dabbiks.superglide.game.world.generator.WorldGenManager.IslandData;
+import com.dabbiks.superglide.game.world.generator.StructureGenerator.StructureType;
 
 import java.util.*;
 import java.util.concurrent.ConcurrentLinkedQueue;
 
 import static com.dabbiks.superglide.ConsoleLogger.Type.WORLD_GENERATOR;
+import static com.dabbiks.superglide.Superglide.instance;
 import static com.dabbiks.superglide.Superglide.plugin;
 
 public class BiomeApplicator {
 
     // * CONFIG
 
-    private final int SCAN_MARGIN_ADDITION = 95;
+    // Zwiększony margines, aby na pewno złapać wystające elementy wysp
+    private final int SCAN_MARGIN_ADDITION = 120;
     private final int SCAN_MAX_Y = 215;
     private final int SCAN_MIN_Y = 110;
 
+    private final int BIOME_APPLY_MIN_Y = 130;
+
     private final double BIOME_NOISE_SCALE = 0.002;
     private final int BIOME_NOISE_OCTAVES = 8;
+
+    // --- NOWE: Konfiguracja "Domain Warping" dla granic biomów ---
+    private final double BORDER_NOISE_SCALE = 0.015; // Częstotliwość zakłóceń
+    private final double BORDER_NOISE_AMPLITUDE = 25.0; // Siła wykrzywiania granic (w blokach)
 
     private final double STONE_PATCH_SCALE = 0.1;
     private final double STONE_PATCH_THRESHOLD = 0.4;
@@ -43,7 +52,6 @@ public class BiomeApplicator {
     private final double FERN_NOISE_SCALE = 0.05;
 
     // * STRUCTURES
-
     private final double CHANCE_JUNGLE_TEMPLE = 0.005;
     private final double CHANCE_PYRAMID = 0.005;
     private final double CHANCE_PORTAL = 0.002;
@@ -53,7 +61,6 @@ public class BiomeApplicator {
     private final Material MAT_BASE_STONE = Material.STONE;
 
     // * BLOCKS
-
     private final Material MAT_MESA_SURFACE = Material.RED_SAND;
     private final Material MAT_DESERT_SURFACE = Material.SAND;
     private final Material MAT_DESERT_UNDER = Material.SANDSTONE;
@@ -73,7 +80,6 @@ public class BiomeApplicator {
     private final Material MAT_PALE_UNDER = Material.DIRT;
 
     // * TREES
-
     private final double CHANCE_TREE_JUNGLE = 0.04;
     private final double CHANCE_TREE_FOREST = 0.015;
     private final double CHANCE_TREE_SPRUCE = 0.01;
@@ -82,8 +88,8 @@ public class BiomeApplicator {
     private final double CHANCE_TREE_CHERRY = 0.035;
     private final double CHANCE_TREE_PALE = 0.020;
 
-    private final int BLOCKS_PER_TICK = 32000;
-    private final int TREES_PER_TICK = 16;
+    private final int BLOCKS_PER_TICK = 64000;
+    private final int TREES_PER_TICK = 32;
 
     // * ----------------------------------------------------------------------------
 
@@ -109,7 +115,7 @@ public class BiomeApplicator {
     }
 
     public void applyBiomes(List<IslandData> islands) {
-        ConsoleLogger.info(WORLD_GENERATOR, "Applying surface biomes (Global Scan)");
+        ConsoleLogger.info(WORLD_GENERATOR, "Applying biomes (Global Scan w/ Blending)");
         World world = Constants.world;
         Random random = new Random();
 
@@ -126,9 +132,14 @@ public class BiomeApplicator {
                 SimplexOctaveGenerator fernNoise = new SimplexOctaveGenerator(random, 2);
                 fernNoise.setScale(FERN_NOISE_SCALE);
 
+                // Szum do zakrzywiania granic
+                SimplexOctaveGenerator borderNoise = new SimplexOctaveGenerator(random, 2);
+                borderNoise.setScale(BORDER_NOISE_SCALE);
+
                 int minX = Integer.MAX_VALUE, maxX = Integer.MIN_VALUE;
                 int minZ = Integer.MAX_VALUE, maxZ = Integer.MIN_VALUE;
 
+                // Obliczamy bounding box
                 for (IslandData island : islands) {
                     int r = island.radius + SCAN_MARGIN_ADDITION;
                     if (island.center.getBlockX() - r < minX) minX = island.center.getBlockX() - r;
@@ -139,7 +150,45 @@ public class BiomeApplicator {
 
                 for (int x = minX; x <= maxX; x++) {
                     for (int z = minZ; z <= maxZ; z++) {
-                        processCoordinateGlobal(x, z, islands, world, random, stoneNoise, fernNoise);
+
+                        // --- LOGIKA MIESZANIA GRANIC (DOMAIN WARPING) ---
+                        // Zamiast szukać biomu dla (x, z), szukamy dla "zaburzonego" (x, z).
+                        // To sprawia, że linia podziału "pływa".
+
+                        double noiseX = borderNoise.noise(x, z, 0.5, 0.5) * BORDER_NOISE_AMPLITUDE;
+                        double noiseZ = borderNoise.noise(z, x, 0.5, 0.5) * BORDER_NOISE_AMPLITUDE; // Odwrócone parametry dla innego wzoru
+
+                        int distortedX = (int) (x + noiseX);
+                        int distortedZ = (int) (z + noiseZ);
+
+                        IslandData closest = null;
+                        double minDistSq = Double.MAX_VALUE;
+
+                        for (IslandData island : islands) {
+                            // Sprawdzamy dystans do ZABURZONEGO punktu
+                            int dx = island.center.getBlockX() - distortedX;
+                            int dz = island.center.getBlockZ() - distortedZ;
+
+                            // Szerokie pre-check (na oryginalnych coordach dla wydajności)
+                            if (Math.abs(island.center.getBlockX() - x) > 400 || Math.abs(island.center.getBlockZ() - z) > 400) continue;
+
+                            double dSq = (dx * dx) + (dz * dz);
+                            if (dSq < minDistSq) {
+                                minDistSq = dSq;
+                                closest = island;
+                            }
+                        }
+
+                        if (closest == null) continue;
+
+                        // --- POPRAWKA NA POZOSTAJĄCĄ WEŁNĘ ---
+                        // Usunąłem sprawdzanie "maxDist". Jeśli jesteśmy w obrębie bounding boxa (minX-maxX),
+                        // to ZAWSZE przypisujemy najbliższy biom. Dzięki temu wystające kawałki wełny
+                        // zostaną pomalowane biomem, który jest do nich najbliżej (nawet jeśli daleko od centrum).
+
+                        CustomBiome biome = islandBiomes.get(closest);
+
+                        processGlobalColumn(world, x, z, biome, random, stoneNoise, fernNoise);
                     }
                 }
 
@@ -158,45 +207,35 @@ public class BiomeApplicator {
         }
     }
 
-    private void processCoordinateGlobal(int x, int z, List<IslandData> islands, World world, Random random, SimplexOctaveGenerator stoneNoise, SimplexOctaveGenerator fernNoise) {
-        IslandData closest = getClosestIsland(x, z, islands);
-        if (closest == null) return;
+    private void processGlobalColumn(World world, int x, int z, CustomBiome biome, Random random, SimplexOctaveGenerator stoneNoise, SimplexOctaveGenerator fernNoise) {
+        int currentY = SCAN_MAX_Y;
 
-        double distSq = distanceSq(x, z, closest.center.getBlockX(), closest.center.getBlockZ());
-        double maxDist = closest.radius + SCAN_MARGIN_ADDITION;
+        while (currentY > SCAN_MIN_Y) {
+            Material mat = world.getBlockAt(x, currentY, z).getType();
 
-        if (distSq > maxDist * maxDist) return;
-
-        CustomBiome biome = islandBiomes.get(closest);
-        processFullColumn(world, x, z, biome, random, stoneNoise, fernNoise);
-    }
-
-    private IslandData getClosestIsland(int x, int z, List<IslandData> islands) {
-        IslandData closest = null;
-        double minDistSq = Double.MAX_VALUE;
-
-        for (IslandData island : islands) {
-            if (Math.abs(island.center.getBlockX() - x) > 350 || Math.abs(island.center.getBlockZ() - z) > 350) continue;
-
-            double distSq = distanceSq(x, z, island.center.getBlockX(), island.center.getBlockZ());
-            if (distSq < minDistSq) {
-                minDistSq = distSq;
-                closest = island;
+            if (mat == Material.AIR) {
+                if (currentY > BIOME_APPLY_MIN_Y) {
+                    blockQueue.add(new ExtendedBlockData(x, currentY, z, null, biome, null, false, 1, true));
+                }
+                currentY--;
+                continue;
             }
+
+            // Każda wełna znaleziona w tym skanie MUSI zostać pomalowana
+            if (mat == Material.WHITE_WOOL) {
+                break;
+            }
+
+            if (currentY > BIOME_APPLY_MIN_Y) {
+                blockQueue.add(new ExtendedBlockData(x, currentY, z, null, biome, null, false, 1, true));
+            }
+            currentY--;
         }
-        return closest;
-    }
 
-    private double distanceSq(int x1, int z1, int x2, int z2) {
-        return Math.pow(x1 - x2, 2) + Math.pow(z1 - z2, 2);
-    }
+        if (currentY <= SCAN_MIN_Y) return;
 
-    private void processFullColumn(World world, int x, int z, CustomBiome biome, Random random, SimplexOctaveGenerator stoneNoise, SimplexOctaveGenerator fernNoise) {
-        int surfaceY = findSurfaceY(world, x, z);
-        if (surfaceY == -1) return;
-
-        int startY = Math.min(SCAN_MAX_Y, surfaceY + 2);
-        int depth = -1;
+        int startY = currentY;
+        int depth = 0;
         boolean firstSurfaceDecorated = false;
 
         for (int y = startY; y > SCAN_MIN_Y; y--) {
@@ -204,26 +243,24 @@ public class BiomeApplicator {
 
             if (currentMat == Material.AIR) {
                 depth = -1;
+                if (y > BIOME_APPLY_MIN_Y) {
+                    blockQueue.add(new ExtendedBlockData(x, y, z, null, biome, null, false, 1, true));
+                }
                 continue;
             }
+
+            // Ważne: Akceptujemy wełnę bezwarunkowo tutaj, bo jesteśmy w środku pętli globalnej
             if (currentMat != Material.WHITE_WOOL) continue;
 
-            depth++;
-            processBlockLayer(x, y, z, depth, biome, random, stoneNoise, fernNoise, firstSurfaceDecorated);
+            boolean shouldApplyBiome = (y > BIOME_APPLY_MIN_Y);
+            processBlockLayer(x, y, z, depth, biome, random, stoneNoise, fernNoise, firstSurfaceDecorated, shouldApplyBiome);
+
             if (depth == 0) firstSurfaceDecorated = true;
+            depth++;
         }
     }
 
-    private int findSurfaceY(World world, int x, int z) {
-        for (int y = SCAN_MAX_Y; y > SCAN_MIN_Y; y--) {
-            if (world.getBlockAt(x, y, z).getType() == Material.WHITE_WOOL) {
-                return y;
-            }
-        }
-        return -1;
-    }
-
-    private void processBlockLayer(int x, int y, int z, int depth, CustomBiome biome, Random random, SimplexOctaveGenerator stoneNoise, SimplexOctaveGenerator fernNoise, boolean firstSurfaceDecorated) {
+    private void processBlockLayer(int x, int y, int z, int depth, CustomBiome biome, Random random, SimplexOctaveGenerator stoneNoise, SimplexOctaveGenerator fernNoise, boolean firstSurfaceDecorated, boolean applyBiome) {
         Material newMat = determineBaseMaterial(biome, depth, y);
         newMat = applyStoneVariation(newMat, x, y, z, depth, stoneNoise);
 
@@ -236,7 +273,7 @@ public class BiomeApplicator {
             }
         }
 
-        blockQueue.add(new ExtendedBlockData(x, y, z, newMat, biome, null, makeGrassSnowy));
+        blockQueue.add(new ExtendedBlockData(x, y, z, newMat, biome, null, makeGrassSnowy, 1, applyBiome));
     }
 
     private Material determineBaseMaterial(CustomBiome biome, int depth, int y) {
@@ -298,66 +335,78 @@ public class BiomeApplicator {
 
     private boolean decorateBiomeSurface(int x, int y, int z, CustomBiome biome, Random random, SimplexOctaveGenerator fernNoise) {
         double chance = random.nextDouble();
+        boolean b = true;
+
         switch (biome) {
-            case DESERT: decorateDesert(x, y, z, biome, chance, random); break;
-            case MESA: decorateMesa(x, y, z, biome, chance, random); break;
-            case JUNGLE: decorateJungle(x, y, z, biome, chance, random); break;
-            case FOREST: decorateForest(x, y, z, biome, chance, random); break;
-            case SPRUCE: return decorateSpruce(x, y, z, biome, chance, random, fernNoise);
-            case OLD_GROWTH_PINE_TAIGA: decorateOldGrowth(x, y, z, biome, chance, random); break;
-            case SAVANNA: decorateSavanna(x, y, z, biome, chance); break;
-            case MUSHROOM_FIELDS: decorateMushroom(x, y, z, biome, chance); break;
-            case CHERRY_GROVE: decorateCherry(x, y, z, biome, chance, random); break;
-            case PALE_GARDEN: decoratePaleGarden(x, y, z, biome, chance, random, fernNoise); break;
+            case DESERT: decorateDesert(x, y, z, biome, chance, random, b); break;
+            case MESA: decorateMesa(x, y, z, biome, chance, random, b); break;
+            case JUNGLE: decorateJungle(x, y, z, biome, chance, random, b); break;
+            case FOREST: decorateForest(x, y, z, biome, chance, random, b); break;
+            case SPRUCE: return decorateSpruce(x, y, z, biome, chance, random, fernNoise, b);
+            case OLD_GROWTH_PINE_TAIGA: decorateOldGrowth(x, y, z, biome, chance, random, b); break;
+            case SAVANNA: decorateSavanna(x, y, z, biome, chance, b); break;
+            case MUSHROOM_FIELDS: decorateMushroom(x, y, z, biome, chance, b); break;
+            case CHERRY_GROVE: decorateCherry(x, y, z, biome, chance, random, b); break;
+            case PALE_GARDEN: decoratePaleGarden(x, y, z, biome, chance, random, fernNoise, b); break;
         }
         return false;
     }
 
-    private void decorateDesert(int x, int y, int z, CustomBiome biome, double chance, Random random) {
+    private void addDeco(int x, int y, int z, Material mat, CustomBiome biome, boolean applyBiome) {
+        if (y <= BIOME_APPLY_MIN_Y) applyBiome = false;
+        blockQueue.add(new ExtendedBlockData(x, y, z, mat, biome, null, false, 1, applyBiome));
+    }
+
+    private void addDeco(int x, int y, int z, Material mat, CustomBiome biome, Bisected.Half half, boolean applyBiome) {
+        if (y <= BIOME_APPLY_MIN_Y) applyBiome = false;
+        blockQueue.add(new ExtendedBlockData(x, y, z, mat, biome, half, false, 1, applyBiome));
+    }
+
+    private void decorateDesert(int x, int y, int z, CustomBiome biome, double chance, Random random, boolean b) {
         if (chance < 0.03) {
-            blockQueue.add(new ExtendedBlockData(x, y, z, Material.DEAD_BUSH, biome));
+            addDeco(x, y, z, Material.DEAD_BUSH, biome, b);
             return;
         }
         if (chance < 0.05) {
             int h = 1 + random.nextInt(3);
-            for(int i=0; i<h; i++) blockQueue.add(new ExtendedBlockData(x, y+i, z, Material.CACTUS, biome));
+            for(int i=0; i<h; i++) addDeco(x, y+i, z, Material.CACTUS, biome, b);
         }
     }
 
-    private void decorateMesa(int x, int y, int z, CustomBiome biome, double chance, Random random) {
+    private void decorateMesa(int x, int y, int z, CustomBiome biome, double chance, Random random, boolean b) {
         if (chance < 0.02) {
             int h = 1 + random.nextInt(2);
-            for(int i=0; i<h; i++) blockQueue.add(new ExtendedBlockData(x, y+i, z, Material.CACTUS, biome));
+            for(int i=0; i<h; i++) addDeco(x, y+i, z, Material.CACTUS, biome, b);
             return;
         }
         if (chance < 0.05) {
-            blockQueue.add(new ExtendedBlockData(x, y, z, Material.DEAD_BUSH, biome));
+            addDeco(x, y, z, Material.DEAD_BUSH, biome, b);
         }
     }
 
-    private void decorateJungle(int x, int y, int z, CustomBiome biome, double chance, Random random) {
+    private void decorateJungle(int x, int y, int z, CustomBiome biome, double chance, Random random, boolean b) {
         if (chance < 0.20) {
-            blockQueue.add(new ExtendedBlockData(x, y, z, Material.SHORT_GRASS, biome));
+            addDeco(x, y, z, Material.SHORT_GRASS, biome, b);
         } else if (chance < 0.50) {
             createTallGrass(x, y, z, biome);
         } else if (chance < 0.55) {
-            blockQueue.add(new ExtendedBlockData(x, y, z, Material.BLUE_ORCHID, biome));
+            addDeco(x, y, z, Material.BLUE_ORCHID, biome, b);
         } else if (chance < 0.60) {
             createBush(x, y, z, Material.JUNGLE_LEAVES, biome, random);
         }
     }
 
-    private void decorateForest(int x, int y, int z, CustomBiome biome, double chance, Random random) {
+    private void decorateForest(int x, int y, int z, CustomBiome biome, double chance, Random random, boolean b) {
         if (chance < 0.15) {
-            blockQueue.add(new ExtendedBlockData(x, y, z, Material.SHORT_GRASS, biome));
+            addDeco(x, y, z, Material.SHORT_GRASS, biome, b);
         } else if (chance < 0.20) {
-            blockQueue.add(new ExtendedBlockData(x, y, z, random.nextBoolean() ? Material.POPPY : Material.DANDELION, biome));
+            addDeco(x, y, z, random.nextBoolean() ? Material.POPPY : Material.DANDELION, biome, b);
         } else if (chance < 0.02) {
-            blockQueue.add(new ExtendedBlockData(x, y, z, Material.FIREFLY_BUSH, biome));
+            addDeco(x, y, z, Material.FIREFLY_BUSH, biome, b);
         }
     }
 
-    private boolean decorateSpruce(int x, int y, int z, CustomBiome biome, double chance, Random random, SimplexOctaveGenerator fernNoise) {
+    private boolean decorateSpruce(int x, int y, int z, CustomBiome biome, double chance, Random random, SimplexOctaveGenerator fernNoise, boolean b) {
         if (chance < 0.02) {
             createBush(x, y, z, Material.SPRUCE_LEAVES, biome, random);
             return false;
@@ -366,61 +415,62 @@ public class BiomeApplicator {
         double cluster = fernNoise.noise(x, z, 0.5, 0.5);
         if (cluster > 0.5 && random.nextDouble() < 0.15) {
             if (random.nextDouble() < 0.5) createLargeFern(x, y, z, biome);
-            else blockQueue.add(new ExtendedBlockData(x, y, z, random.nextBoolean() ? Material.BROWN_MUSHROOM : Material.RED_MUSHROOM, biome));
+            else addDeco(x, y, z, random.nextBoolean() ? Material.BROWN_MUSHROOM : Material.RED_MUSHROOM, biome, b);
             return false;
         }
 
-        blockQueue.add(new ExtendedBlockData(x, y, z, Material.SNOW, biome));
+        addDeco(x, y, z, Material.SNOW, biome, b);
         return true;
     }
 
-    private void decorateOldGrowth(int x, int y, int z, CustomBiome biome, double chance, Random random) {
+    private void decorateOldGrowth(int x, int y, int z, CustomBiome biome, double chance, Random random, boolean b) {
         if (chance < 0.015) {
             createBoulder(x, y, z, biome, random);
         } else if (chance < 0.06) {
             createBush(x, y, z, Material.SPRUCE_LEAVES, biome, random);
         } else if (chance < 0.30) {
-            blockQueue.add(new ExtendedBlockData(x, y, z, Material.FERN, biome));
+            addDeco(x, y, z, Material.FERN, biome, b);
         } else if (chance < 0.35) {
             createLargeFern(x, y, z, biome);
         }
     }
 
-    private void decorateSavanna(int x, int y, int z, CustomBiome biome, double chance) {
+    private void decorateSavanna(int x, int y, int z, CustomBiome biome, double chance, boolean b) {
         if (chance < 0.50) {
-            blockQueue.add(new ExtendedBlockData(x, y, z, Material.SHORT_GRASS, biome));
+            addDeco(x, y, z, Material.SHORT_GRASS, biome, b);
         } else if (chance < 0.70) {
             createTallGrass(x, y, z, biome);
         }
     }
 
-    private void decorateMushroom(int x, int y, int z, CustomBiome biome, double chance) {
+    private void decorateMushroom(int x, int y, int z, CustomBiome biome, double chance, boolean b) {
         if (chance < 0.03) {
-            blockQueue.add(new ExtendedBlockData(x, y, z, Material.RED_MUSHROOM, biome));
+            addDeco(x, y, z, Material.RED_MUSHROOM, biome, b);
         } else if (chance < 0.06) {
-            blockQueue.add(new ExtendedBlockData(x, y, z, Material.BROWN_MUSHROOM, biome));
+            addDeco(x, y, z, Material.BROWN_MUSHROOM, biome, b);
         }
     }
 
-    private void decorateCherry(int x, int y, int z, CustomBiome biome, double chance, Random random) {
+    private void decorateCherry(int x, int y, int z, CustomBiome biome, double chance, Random random, boolean b) {
         if (chance < 0.40) {
             int petals = 1 + random.nextInt(4);
-            blockQueue.add(new ExtendedBlockData(x, y, z, Material.PINK_PETALS, biome, null, false, petals));
+            boolean apply = y > BIOME_APPLY_MIN_Y;
+            blockQueue.add(new ExtendedBlockData(x, y, z, Material.PINK_PETALS, biome, null, false, petals, apply));
         }
     }
 
-    private void decoratePaleGarden(int x, int y, int z, CustomBiome biome, double chance, Random random, SimplexOctaveGenerator fernNoise) {
+    private void decoratePaleGarden(int x, int y, int z, CustomBiome biome, double chance, Random random, SimplexOctaveGenerator fernNoise, boolean b) {
         double mossCluster = fernNoise.noise(x, z, 0.8, 0.8) + (random.nextDouble() * 0.1);
         if (mossCluster > 0.4) {
-            blockQueue.add(new ExtendedBlockData(x, y, z, Material.PALE_MOSS_CARPET, biome));
+            addDeco(x, y, z, Material.PALE_MOSS_CARPET, biome, b);
             return;
         }
         if (chance < 0.05) {
-            blockQueue.add(new ExtendedBlockData(x, y, z, Material.CLOSED_EYEBLOSSOM, biome));
+            addDeco(x, y, z, Material.CLOSED_EYEBLOSSOM, biome, b);
             return;
         }
         if (chance < 0.35) {
-            blockQueue.add(new ExtendedBlockData(x, y, z, Material.SHORT_GRASS, biome));
+            addDeco(x, y, z, Material.SHORT_GRASS, biome, b);
         }
     }
 
@@ -458,10 +508,14 @@ public class BiomeApplicator {
     }
 
     private void createBush(int x, int y, int z, Material leafType, CustomBiome biome, Random random) {
-        blockQueue.add(new ExtendedBlockData(x, y, z, leafType, biome));
+        boolean b = y > BIOME_APPLY_MIN_Y;
+        blockQueue.add(new ExtendedBlockData(x, y, z, leafType, biome, null, false, 1, b));
         int[][] offsets = {{1,0,0}, {-1,0,0}, {0,0,1}, {0,0,-1}, {0,1,0}};
         for (int[] off : offsets) {
-            if (random.nextBoolean()) blockQueue.add(new ExtendedBlockData(x + off[0], y + off[1], z + off[2], leafType, biome));
+            if (random.nextBoolean()) {
+                boolean bOff = (y + off[1]) > BIOME_APPLY_MIN_Y;
+                blockQueue.add(new ExtendedBlockData(x + off[0], y + off[1], z + off[2], leafType, biome, null, false, 1, bOff));
+            }
         }
     }
 
@@ -471,20 +525,25 @@ public class BiomeApplicator {
             for(int by = 0; by < size; by++) {
                 for(int bz = 0; bz < size; bz++) {
                     Material mat = random.nextBoolean() ? Material.COBBLESTONE : Material.MOSSY_COBBLESTONE;
-                    blockQueue.add(new ExtendedBlockData(x + bx, y + by - 1, z + bz, mat, biome));
+                    boolean b = (y + by - 1) > BIOME_APPLY_MIN_Y;
+                    blockQueue.add(new ExtendedBlockData(x + bx, y + by - 1, z + bz, mat, biome, null, false, 1, b));
                 }
             }
         }
     }
 
     private void createTallGrass(int x, int y, int z, CustomBiome biome) {
-        blockQueue.add(new ExtendedBlockData(x, y, z, Material.TALL_GRASS, biome, Bisected.Half.BOTTOM));
-        blockQueue.add(new ExtendedBlockData(x, y + 1, z, Material.TALL_GRASS, biome, Bisected.Half.TOP));
+        boolean b1 = y > BIOME_APPLY_MIN_Y;
+        boolean b2 = (y + 1) > BIOME_APPLY_MIN_Y;
+        blockQueue.add(new ExtendedBlockData(x, y, z, Material.TALL_GRASS, biome, Bisected.Half.BOTTOM, false, 1, b1));
+        blockQueue.add(new ExtendedBlockData(x, y + 1, z, Material.TALL_GRASS, biome, Bisected.Half.TOP, false, 1, b2));
     }
 
     private void createLargeFern(int x, int y, int z, CustomBiome biome) {
-        blockQueue.add(new ExtendedBlockData(x, y, z, Material.LARGE_FERN, biome, Bisected.Half.BOTTOM));
-        blockQueue.add(new ExtendedBlockData(x, y + 1, z, Material.LARGE_FERN, biome, Bisected.Half.TOP));
+        boolean b1 = y > BIOME_APPLY_MIN_Y;
+        boolean b2 = (y + 1) > BIOME_APPLY_MIN_Y;
+        blockQueue.add(new ExtendedBlockData(x, y, z, Material.LARGE_FERN, biome, Bisected.Half.BOTTOM, false, 1, b1));
+        blockQueue.add(new ExtendedBlockData(x, y + 1, z, Material.LARGE_FERN, biome, Bisected.Half.TOP, false, 1, b2));
     }
 
     private CustomBiome getBiomeType(double noise) {
@@ -523,8 +582,9 @@ public class BiomeApplicator {
 
                     if (treeQueue.isEmpty() && structureQueue.isEmpty()) {
                         removeDroppedItems(world);
-                        ConsoleLogger.info(WORLD_GENERATOR, "Surface painted successfully");
+                        ConsoleLogger.info(WORLD_GENERATOR, "Biomes applied successfully");
                         WorldManager.isWorldGenerated = true;
+                        VisualizePath.paths(instance);
                         this.cancel();
                     }
                 } else if (blockQueue.isEmpty()) {
@@ -548,14 +608,17 @@ public class BiomeApplicator {
         if (!world.isChunkLoaded(data.x >> 4, data.z >> 4)) {
             world.loadChunk(data.x >> 4, data.z >> 4);
         }
+
+        if (data.applyBiome) {
+            Biome mcBiome = mapToBiome(data.biomeType);
+            world.setBiome(data.x, data.y, data.z, mcBiome);
+        }
+
+        if (data.material == null) return;
+
         Block b = world.getBlockAt(data.x, data.y, data.z);
-
-        Biome mcBiome = mapToBiome(data.biomeType);
-        world.setBiome(data.x, data.y, data.z, mcBiome);
-
         BlockData bd = data.material.createBlockData();
         configureBlockData(bd, data);
-
         b.setBlockData(bd, false);
     }
 
@@ -634,22 +697,12 @@ public class BiomeApplicator {
         Bisected.Half half;
         boolean isSnowy;
         int petalCount;
+        boolean applyBiome;
 
-        public ExtendedBlockData(int x, int y, int z, Material m, CustomBiome b) {
-            this(x, y, z, m, b, null, false, 1);
-        }
-
-        public ExtendedBlockData(int x, int y, int z, Material m, CustomBiome b, Bisected.Half h) {
-            this(x, y, z, m, b, h, false, 1);
-        }
-
-        public ExtendedBlockData(int x, int y, int z, Material m, CustomBiome b, Bisected.Half h, boolean snowy) {
-            this(x, y, z, m, b, h, snowy, 1);
-        }
-
-        public ExtendedBlockData(int x, int y, int z, Material m, CustomBiome b, Bisected.Half h, boolean snowy, int petalCount) {
+        public ExtendedBlockData(int x, int y, int z, Material m, CustomBiome b, Bisected.Half h, boolean snowy, int petalCount, boolean applyBiome) {
             this.x = x; this.y = y; this.z = z; this.material = m; this.biomeType = b;
             this.half = h; this.isSnowy = snowy; this.petalCount = petalCount;
+            this.applyBiome = applyBiome;
         }
     }
 }

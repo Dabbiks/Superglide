@@ -1,8 +1,7 @@
-package com.dabbiks.superglide.game.world;
+package com.dabbiks.superglide.game.world.generator;
 
 import com.dabbiks.superglide.ConsoleLogger;
 import com.dabbiks.superglide.utils.Constants;
-import org.bukkit.Bukkit;
 import org.bukkit.Location;
 import org.bukkit.Material;
 import org.bukkit.TreeType;
@@ -14,8 +13,8 @@ import org.bukkit.entity.Entity;
 import org.bukkit.entity.Item;
 import org.bukkit.scheduler.BukkitRunnable;
 import org.bukkit.util.noise.SimplexOctaveGenerator;
-import com.dabbiks.superglide.game.world.WorldGenManager.IslandData;
-import com.dabbiks.superglide.game.world.StructureGenerator.StructureType;
+import com.dabbiks.superglide.game.world.generator.WorldGenManager.IslandData;
+import com.dabbiks.superglide.game.world.generator.StructureGenerator.StructureType;
 
 import java.util.*;
 import java.util.concurrent.ConcurrentLinkedQueue;
@@ -57,8 +56,8 @@ public class NetherBiomeApplicator {
     private final double CHANCE_PORTAL = 0.003;
 
     // WYDAJNOŚĆ
-    private final int BLOCKS_PER_TICK = 8000;
-    private final int TREES_PER_TICK = 4;
+    private final int BLOCKS_PER_TICK = 16000;
+    private final int TREES_PER_TICK = 8;
 
     private final Queue<NetherBlockData> blockQueue = new ConcurrentLinkedQueue<>();
     private final Queue<TreeRequest> treeQueue = new ConcurrentLinkedQueue<>();
