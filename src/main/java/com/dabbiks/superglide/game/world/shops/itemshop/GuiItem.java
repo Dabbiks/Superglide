@@ -1,4 +1,4 @@
-package com.dabbiks.superglide.inventory.itemshop;
+package com.dabbiks.superglide.game.world.shops.itemshop;
 
 import com.dabbiks.superglide.player.data.session.SessionData;
 import com.dabbiks.superglide.player.data.session.SessionDataManager;
@@ -15,11 +15,11 @@ import xyz.xenondevs.invui.item.impl.AbstractItem;
 
 import static com.dabbiks.superglide.Superglide.soundU;
 
-public class ShopItem extends AbstractItem {
+public class GuiItem extends AbstractItem {
     private final Player player;
     private final ItemStack item;
 
-    public ShopItem(ItemStack item, Player player) {
+    public GuiItem(ItemStack item, Player player) {
         this.player = player;
         this.item = item;
     }
