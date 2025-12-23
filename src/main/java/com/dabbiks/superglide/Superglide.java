@@ -2,12 +2,13 @@ package com.dabbiks.superglide;
 
 import com.dabbiks.superglide.game.teams.TeamLoader;
 import com.dabbiks.superglide.game.teams.TeamManager;
-import com.dabbiks.superglide.game.world.WorldManager;
+import com.dabbiks.superglide.game.world.generator.WorldManager;
 import com.dabbiks.superglide.items.ItemManager;
 import com.dabbiks.superglide.player.data.persistent.PersistentDataJson;
 import com.dabbiks.superglide.player.traffic.Join;
 import com.dabbiks.superglide.player.traffic.Quit;
 import com.dabbiks.superglide.tasks.TaskManager;
+import com.dabbiks.superglide.utils.Symbols;
 import com.dabbiks.superglide.utils.other.TimeUtils;
 import com.dabbiks.superglide.utils.player.GroupUtils;
 import com.dabbiks.superglide.utils.player.MessageUtils;
@@ -30,6 +31,7 @@ public final class Superglide extends JavaPlugin {
     public static SoundUtils soundU;
     public static TitleUtils titleU;
     public static TimeUtils timeU;
+    public static Symbols symbols;
 
     @Override
     public void onEnable() {
@@ -44,6 +46,7 @@ public final class Superglide extends JavaPlugin {
         soundU   = new SoundUtils();
         titleU   = new TitleUtils();
         timeU    = new TimeUtils();
+        symbols  = new Symbols();
 
         // * -----------------------------------------
 
@@ -57,10 +60,13 @@ public final class Superglide extends JavaPlugin {
 
         Bukkit.getPluginManager().registerEvents(new Join(), this);
         Bukkit.getPluginManager().registerEvents(new Quit(), this);
+
+        Happi.initiate();
     }
 
     @Override
     public void onDisable() {
-        // Plugin shutdown logic
+        Happi.kill();
     }
+
 }

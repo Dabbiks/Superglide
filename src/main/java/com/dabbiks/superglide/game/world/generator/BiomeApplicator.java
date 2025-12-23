@@ -1,7 +1,7 @@
 package com.dabbiks.superglide.game.world.generator;
 
 import com.dabbiks.superglide.ConsoleLogger;
-import com.dabbiks.superglide.VisualizePath;
+import com.dabbiks.superglide.game.world.pathfinder.VisualizePath;
 import com.dabbiks.superglide.utils.Constants;
 import org.bukkit.Location;
 import org.bukkit.Material;

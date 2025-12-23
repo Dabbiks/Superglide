@@ -4,7 +4,7 @@ import com.dabbiks.superglide.game.state.GameState;
 import com.dabbiks.superglide.game.state.GameStateManager;
 import com.dabbiks.superglide.game.teams.TeamManager;
 import com.dabbiks.superglide.game.teams.TeamTeleport;
-import com.dabbiks.superglide.game.world.WorldManager;
+import com.dabbiks.superglide.game.world.generator.WorldManager;
 import com.dabbiks.superglide.player.state.PlayerState;
 import com.dabbiks.superglide.player.state.PlayerStateManager;
 import com.dabbiks.superglide.tasks.Task;

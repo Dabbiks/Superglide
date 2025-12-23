@@ -1,7 +1,7 @@
 package com.dabbiks.superglide.game.teams;
 
 import com.dabbiks.superglide.cosmetics.cages.Cage;
-import com.dabbiks.superglide.game.world.SchematicPaster;
+import com.dabbiks.superglide.game.world.generator.SchematicPaster;
 import com.dabbiks.superglide.player.data.persistent.PersistentData;
 import com.dabbiks.superglide.player.data.persistent.PersistentDataManager;
 import com.dabbiks.superglide.utils.Constants;

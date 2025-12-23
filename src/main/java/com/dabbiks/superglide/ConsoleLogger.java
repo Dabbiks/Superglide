@@ -19,6 +19,7 @@ public class ConsoleLogger {
     public enum Type {
         PLAYER_DATA,
         WORLD_GENERATOR,
+        PATHFINDER,
         PLUGIN
     }
 
