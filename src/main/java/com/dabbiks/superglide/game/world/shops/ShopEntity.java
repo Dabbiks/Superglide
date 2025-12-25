@@ -125,13 +125,15 @@ public class ShopEntity {
     }
 
     private boolean isOtherShopOnTrack() {
-        for (ShopEntity shopEntity : shopEntities) {
-            if (trackIndex - shopEntity.trackIndex + 100 <= 0) return true;
+        int trackSize = track.size();
+        for (ShopEntity other : shopEntities) {
+            if (other == this) continue;
 
-            boolean isLowerThanZero = shopEntity.trackIndex - 100 < 0;
-            if (!isLowerThanZero) continue;
-            if ((track.size() - trackIndex) + shopEntity.trackIndex < 100) continue;
-            return true;
+            int distanceAhead = (other.trackIndex - this.trackIndex + trackSize) % trackSize;
+
+            if (distanceAhead > 0 && distanceAhead < 100) {
+                return true;
+            }
         }
         return false;
     }
