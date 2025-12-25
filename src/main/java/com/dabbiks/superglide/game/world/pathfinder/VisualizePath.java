@@ -1,5 +1,6 @@
 package com.dabbiks.superglide.game.world.pathfinder;
 
+import com.dabbiks.superglide.ConsoleLogger;
 import org.bukkit.Bukkit;
 import org.bukkit.Color;
 import org.bukkit.Location;
@@ -56,8 +57,8 @@ public class VisualizePath {
 
                     HashMap<Integer, Location> smoothPath = PathSmoother.smoothPath(rawPathMap, 20);
 
-                    plugin.getLogger().info("Pathfinder zakończony. Surowe punkty: " + rawPathMap.size() +
-                            ", Gładkie punkty: " + smoothPath.size());
+                    ConsoleLogger.info(ConsoleLogger.Type.PATHFINDER,
+                            "Path found (raw " + rawPathMap.size() + ") (smooth " + smoothPath.size());
 
                     BukkitTask task = Bukkit.getScheduler().runTaskTimer(plugin, () -> {
                         visualizePath(smoothPath, color);
@@ -66,7 +67,7 @@ public class VisualizePath {
                     activeTasks.add(task.getTaskId());
 
                 } else {
-                    plugin.getLogger().warning("Nie udało się wygenerować ścieżki (" + color.asRGB() + ") - pusta mapa.");
+                    ConsoleLogger.warning(ConsoleLogger.Type.PATHFINDER, "Could not generate path. HashMap is empty");
                 }
             });
 

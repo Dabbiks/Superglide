@@ -64,7 +64,7 @@ public class TeamTeleport {
 
             String schematic = "";
             if (data.getCage() == null) { schematic = "default_cage.schem"; data.setCage(Cage.DEFAULT_CAGE); }
-            if (schematic.isEmpty()) schematic = data.getCage().getName().toLowerCase();
+            if (schematic.isEmpty()) schematic = data.getCage().getName().toLowerCase() + ".schem";
 
             SchematicPaster.pasteSchematic(schematic, spawnLoc);
 
