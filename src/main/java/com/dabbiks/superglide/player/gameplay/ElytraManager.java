@@ -25,6 +25,7 @@ public class ElytraManager {
     public void modifyVelocity(Player player, double x, double y, double z) {
         Vector currentVelocity = player.getVelocity();
         player.setVelocity(currentVelocity.add(new Vector(x, y, z)));
+        player.getLocation().setDirection(new Vector(x, y, z));
     }
 
 }
