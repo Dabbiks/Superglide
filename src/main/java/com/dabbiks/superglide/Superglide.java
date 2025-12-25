@@ -60,13 +60,11 @@ public final class Superglide extends JavaPlugin {
 
         Bukkit.getPluginManager().registerEvents(new Join(), this);
         Bukkit.getPluginManager().registerEvents(new Quit(), this);
-
-        Happi.initiate();
     }
 
     @Override
     public void onDisable() {
-        Happi.kill();
+
     }
 
 }

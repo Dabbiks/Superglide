@@ -21,8 +21,8 @@ public class ShopManager {
     public void spawnShops() {
         findPathForShops();
 
-        ItemShopEntity itemShop = new ItemShopEntity(path, 0);
-        GunShopEntity gunShop = new GunShopEntity(path, (int) (path.size()*0.33));
+        new ItemShopEntity(path, 0);
+        new GunShopEntity(path, (int) (path.size()*0.33));
     }
 
     private void findPathForShops() {
