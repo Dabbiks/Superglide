@@ -9,6 +9,9 @@ import org.bukkit.inventory.meta.PotionMeta;
 import org.bukkit.potion.PotionEffect;
 import org.bukkit.potion.PotionEffectType;
 
+import javax.print.attribute.Attribute;
+import java.util.ArrayList;
+import java.util.List;
 import java.util.Map;
 
 public class ItemBuilder {
@@ -51,6 +54,22 @@ public class ItemBuilder {
         }
 
         return nbt.getItem();
+    }
+
+    // ! TODO
+    private List<String> formatLore() {
+        List<String> description = definition.getLore();
+        List<String> attributes = new ArrayList<>();
+        List<String> perks = new ArrayList<>();
+        List<String> potion = new ArrayList<>();
+
+        for (AttributeType attribute : AttributeType.values()) {
+            if (definition.getAttributeMap().containsKey(attribute.name())) {
+                attributes.add(definition.getAttributeMap().get(attribute.name()) + " " + attribute.getIcon() + " " + attribute.name());
+            }
+        }
+
+        return description;
     }
 
     private void handlePotionLogic(PotionMeta meta, Map<String, Object> data) {
