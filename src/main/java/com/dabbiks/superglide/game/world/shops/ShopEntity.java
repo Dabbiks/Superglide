@@ -17,25 +17,27 @@ import org.bukkit.inventory.ItemStack;
 import org.bukkit.scheduler.BukkitRunnable;
 import org.bukkit.scheduler.BukkitTask;
 
-import java.util.ArrayList;
-import java.util.HashMap;
-import java.util.List;
-import java.util.UUID;
+import java.util.*;
 
 import static com.dabbiks.superglide.Superglide.plugin;
 
 public class ShopEntity {
 
+    public static final List<ShopEntity> shopEntities = new ArrayList<>();
+
     private HappyGhast happyGhast;
     private Mannequin mannequin;
-    private HashMap<Integer, Location> track;
     private BukkitTask flightTask;
+    private final HashMap<Integer, Location> track;
 
     private int trackIndex;
+    private int boostedTicks;
 
     public ShopEntity(HashMap<Integer, Location> track, int trackIndex) {
         this.track = track;
         this.trackIndex = trackIndex;
+
+        shopEntities.add(this);
     }
 
     public void spawn() {
@@ -91,10 +93,12 @@ public class ShopEntity {
                     return;
                 }
 
-                boolean isStopped = isPlayerClose();
+                boolean isStopped = isPlayerClose() || isOtherShopOnTrack();
+                if (isStopped) boostedTicks++;
 
+                boolean isBoosted = boostedTicks > 0;
                 if (!isStopped) {
-                    updatePosition(getNextPosition());
+                    updatePosition(getNextPosition(isBoosted));
                 }
             }
         }.runTaskTimer(plugin, 0L, 1L);
@@ -104,8 +108,9 @@ public class ShopEntity {
         happyGhast.teleport(track.getOrDefault(trackIndex, new Location(Constants.world, 0, 300, 0)));
     }
 
-    private int getNextPosition() {
+    private int getNextPosition(boolean isTickBoosted) {
         int nextIndex = trackIndex + 1;
+        if (isTickBoosted) nextIndex++;
         if (nextIndex > track.size()) { trackIndex = 1; return 1; }
         trackIndex = nextIndex;
         return trackIndex;
@@ -115,6 +120,18 @@ public class ShopEntity {
         for (Entity entity : happyGhast.getNearbyEntities(2.5, 4.0, 2.5)) {
             if (!(entity instanceof Player)) continue;
             if (entity.getLocation().getY() >= happyGhast.getLocation().getY() + 2) return true;
+        }
+        return false;
+    }
+
+    private boolean isOtherShopOnTrack() {
+        for (ShopEntity shopEntity : shopEntities) {
+            if (trackIndex - shopEntity.trackIndex + 100 <= 0) return true;
+
+            boolean isLowerThanZero = shopEntity.trackIndex - 100 < 0;
+            if (!isLowerThanZero) continue;
+            if ((track.size() - trackIndex) + shopEntity.trackIndex < 100) continue;
+            return true;
         }
         return false;
     }
