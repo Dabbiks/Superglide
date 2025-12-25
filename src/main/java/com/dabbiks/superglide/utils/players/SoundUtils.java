@@ -1,4 +1,4 @@
-package com.dabbiks.superglide.utils.player;
+package com.dabbiks.superglide.utils.players;
 
 import org.bukkit.Location;
 import org.bukkit.Sound;

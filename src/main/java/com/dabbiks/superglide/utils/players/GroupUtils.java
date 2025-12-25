@@ -1,4 +1,4 @@
-package com.dabbiks.superglide.utils.player;
+package com.dabbiks.superglide.utils.players;
 
 import com.dabbiks.superglide.player.state.PlayerState;
 import com.dabbiks.superglide.player.state.PlayerStateManager;

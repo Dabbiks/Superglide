@@ -9,11 +9,12 @@ import com.dabbiks.superglide.player.traffic.Join;
 import com.dabbiks.superglide.player.traffic.Quit;
 import com.dabbiks.superglide.tasks.TaskManager;
 import com.dabbiks.superglide.utils.Symbols;
+import com.dabbiks.superglide.utils.items.AttributeUtils;
 import com.dabbiks.superglide.utils.other.TimeUtils;
-import com.dabbiks.superglide.utils.player.GroupUtils;
-import com.dabbiks.superglide.utils.player.MessageUtils;
-import com.dabbiks.superglide.utils.player.SoundUtils;
-import com.dabbiks.superglide.utils.player.TitleUtils;
+import com.dabbiks.superglide.utils.players.GroupUtils;
+import com.dabbiks.superglide.utils.players.MessageUtils;
+import com.dabbiks.superglide.utils.players.SoundUtils;
+import com.dabbiks.superglide.utils.players.TitleUtils;
 import org.bukkit.Bukkit;
 import org.bukkit.plugin.Plugin;
 import org.bukkit.plugin.java.JavaPlugin;
@@ -31,6 +32,7 @@ public final class Superglide extends JavaPlugin {
     public static SoundUtils soundU;
     public static TitleUtils titleU;
     public static TimeUtils timeU;
+    public static AttributeUtils attributeU;
     public static Symbols symbols;
 
     @Override
@@ -41,12 +43,13 @@ public final class Superglide extends JavaPlugin {
         persistentDataJson = new PersistentDataJson();
         itemManager = new ItemManager();
 
-        groupU   = new GroupUtils();
-        messageU = new MessageUtils();
-        soundU   = new SoundUtils();
-        titleU   = new TitleUtils();
-        timeU    = new TimeUtils();
-        symbols  = new Symbols();
+        groupU     = new GroupUtils();
+        messageU   = new MessageUtils();
+        soundU     = new SoundUtils();
+        titleU     = new TitleUtils();
+        timeU      = new TimeUtils();
+        attributeU = new AttributeUtils();
+        symbols    = new Symbols();
 
         // * -----------------------------------------
 

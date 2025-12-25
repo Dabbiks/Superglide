@@ -64,9 +64,8 @@ public class ItemBuilder {
         List<String> potion = new ArrayList<>();
 
         for (AttributeType attribute : AttributeType.values()) {
-            if (definition.getAttributeMap().containsKey(attribute.name())) {
-                attributes.add(definition.getAttributeMap().get(attribute.name()) + " " + attribute.getIcon() + " " + attribute.name());
-            }
+            if (!definition.getAttributeMap().containsKey(attribute.name())) continue;
+            attributes.add(definition.getAttributeMap().get(attribute.name()) + " " + attribute.getIcon() + " " + attribute.name());
         }
 
         return description;
