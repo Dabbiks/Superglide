@@ -10,7 +10,7 @@ import static com.dabbiks.superglide.Superglide.symbols;
 
 public class ItemShopEntity {
 
-    private static ShopEntity itemShopEntity;
+    private final ShopEntity itemShopEntity;
 
     public ItemShopEntity(HashMap<Integer, Location> track, int trackIndex) {
         itemShopEntity = new ShopEntity(track, trackIndex);

@@ -14,7 +14,7 @@ import static com.dabbiks.superglide.Superglide.itemManager;
 
 public class ItemShopGui {
 
-    public static void open(Player player) {
+    public void open(Player player) {
 
         Gui.Builder.Normal guiBuilder = Gui.normal()
                 .setStructure(
