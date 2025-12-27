@@ -1,4 +1,4 @@
-package com.dabbiks.superglide.items.guns;
+package com.dabbiks.superglide.items.guns.enums;
 
 public enum GunFireMode {
     SINGLE,

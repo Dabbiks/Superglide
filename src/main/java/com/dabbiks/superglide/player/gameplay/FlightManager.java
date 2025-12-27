@@ -3,7 +3,7 @@ package com.dabbiks.superglide.player.gameplay;
 import org.bukkit.entity.Player;
 import org.bukkit.util.Vector;
 
-public class ElytraManager {
+public class FlightManager {
 
     public void startGliding(Player player) {
         player.setGliding(true);

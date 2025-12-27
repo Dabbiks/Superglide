@@ -1,5 +1,7 @@
 package com.dabbiks.superglide.items.guns;
 
+import com.dabbiks.superglide.items.guns.enums.GunFireMode;
+
 public class GunInstance {
 
     private GunDefinition gun;
