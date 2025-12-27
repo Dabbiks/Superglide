@@ -4,6 +4,7 @@ import com.dabbiks.superglide.game.teams.TeamLoader;
 import com.dabbiks.superglide.game.teams.TeamManager;
 import com.dabbiks.superglide.game.world.generator.WorldManager;
 import com.dabbiks.superglide.items.ItemManager;
+import com.dabbiks.superglide.items.guns.mechanics.GunMechanics;
 import com.dabbiks.superglide.player.data.persistent.PersistentDataJson;
 import com.dabbiks.superglide.player.traffic.Join;
 import com.dabbiks.superglide.player.traffic.Quit;
@@ -63,6 +64,7 @@ public final class Superglide extends JavaPlugin {
 
         Bukkit.getPluginManager().registerEvents(new Join(), this);
         Bukkit.getPluginManager().registerEvents(new Quit(), this);
+        Bukkit.getPluginManager().registerEvents(new GunMechanics(), this);
     }
 
     @Override
