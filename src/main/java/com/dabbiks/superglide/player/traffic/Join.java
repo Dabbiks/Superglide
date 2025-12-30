@@ -22,6 +22,8 @@ public class Join implements Listener {
         PersistentDataManager.loadData(player.getUniqueId());
         BoardManager.addBoard(player);
 
+        event.setJoinMessage("+ " + player.name());
+
         PersistentData data = PersistentDataManager.getData(player.getUniqueId());
 
         if (data == null) {

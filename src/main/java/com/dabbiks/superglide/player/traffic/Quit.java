@@ -19,5 +19,7 @@ public class Quit implements Listener {
         PlayerStateManager.removePlayerState(player.getUniqueId());
         PersistentDataManager.saveData(player.getUniqueId());
         PersistentDataManager.delData(player.getUniqueId());
+
+        event.setQuitMessage("- " + player.name());
     }
 }
